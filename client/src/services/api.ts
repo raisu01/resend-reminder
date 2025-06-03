@@ -7,10 +7,15 @@ export interface EmailData {
   to: string;
 }
 
+interface ApiResponse {
+  status: 'delivered' | 'pending' | 'failed';
+  id?: number;
+}
+
 export interface EmailResponse {
   success: boolean;
   message: string;
-  error?: any;
+  error?: unknown;
   id?: number;
   status: 'delivered' | 'pending' | 'failed';
 }
@@ -32,10 +37,8 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const sendEmail = async (emailData: EmailData): Promise<EmailResponse> => {
   try {
-    // Attendre 2 secondes pour simuler le délai d'envoi
     await wait(2000);
-
-    const response = await axiosInstance.post('/send', {
+    const response = await axiosInstance.post<ApiResponse>('/send', {
       to: emailData.to,
       subject: emailData.subject,
       message: emailData.text || emailData.html || ''
@@ -44,8 +47,8 @@ export const sendEmail = async (emailData: EmailData): Promise<EmailResponse> =>
     return {
       success: true,
       message: 'Email envoyé avec succès',
-      status: 'delivered',
-      ...response.data
+      id: response.data.id,
+      status: response.data.status || 'pending'
     };
   } catch (error) {
     console.error('Erreur lors de l\'envoi de l\'email:', error);
@@ -60,18 +63,20 @@ export const sendEmail = async (emailData: EmailData): Promise<EmailResponse> =>
 
 export const checkEmailStatus = async (emailId: string | number): Promise<EmailResponse> => {
   try {
-    const response = await axiosInstance.get(`/status/${emailId}`);
+    const response = await axiosInstance.get<ApiResponse>(`/status/${emailId}`);
     return {
       success: true,
       message: 'Statut récupéré avec succès',
-      ...response.data
+      id: response.data.id,
+      status: response.data.status || 'pending'
     };
   } catch (error) {
     console.error('Erreur lors de la vérification du statut:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Échec de la vérification du statut',
+      status: 'failed',
       error
     };
   }
-}; 
+};
