@@ -66,7 +66,11 @@ const Dashboard = () => {
     }
 
     try {
-      const response = await axios.post('/api/send', formData)
+      const response = await axios.post('/api/send', formData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
       
       newRequest.status = response.data.success ? 'success' : 'error'
       newRequest.message = response.data.message

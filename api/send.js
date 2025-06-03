@@ -14,8 +14,8 @@ dotenv.config();
 const app = express();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Middleware pour servir les fichiers statiques
-app.use(express.static(path.join(__dirname, '../public')));
+// Middleware pour servir les fichiers statiques de React
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
 app.use(express.json());
 // ✅ CORS configuration
@@ -52,7 +52,6 @@ app.options('/send', (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   return res.sendStatus(200);
 });
-
 
 const generateEmailTemplate = (data) => {
   const { subject, message } = data;
@@ -261,6 +260,11 @@ L'équipe NoRize
       error: err.message 
     });
   }
+});
+
+// Route pour servir l'application React pour toutes les autres routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
