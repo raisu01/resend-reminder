@@ -1,4 +1,4 @@
-import { FiMail, FiCheckCircle, FiBarChart2, FiArrowRight, FiZap, FiTrendingUp, FiRefreshCw } from 'react-icons/fi'
+import { FiMail, FiCheckCircle, FiBarChart2, FiArrowRight, FiZap, FiRefreshCw } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 
 const features = [
