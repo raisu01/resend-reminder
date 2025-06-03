@@ -6,15 +6,15 @@
         "use": "@vercel/node"
       },
       {
-        "src": "public/**",
-        "use": "@vercel/static"
+        "src": "client",
+        "use": "@vercel/static-build",
+        "config": {
+          "buildCommand": "cd client && npm install && npm run build",
+          "outputDirectory": "client/dist"
+        }
       }
     ],
     "routes": [
-      {
-        "src": "/dashboard",
-        "dest": "/api/dashboard.js"
-      },
       {
         "src": "/dashboard/api/requests",
         "dest": "/api/dashboard.js"
@@ -25,7 +25,12 @@
       },
       {
         "src": "/(.*)",
-        "dest": "/public/$1"
+        "dest": "/client/dist/$1",
+        "continue": true
+      },
+      {
+        "src": "/[^.]+",
+        "dest": "/client/dist/index.html"
       }
     ]
   }
