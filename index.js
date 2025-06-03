@@ -28,10 +28,10 @@ app.post('/send', async (req, res) => {
       <table cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%; background-color: #f4f4f4;">
         <tr>
           <td align="center" style="padding: 40px 0;">
-            <table cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <table cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(248, 241, 241, 0.1);">
               <!-- En-tête -->
               <tr>
-                <td style="padding: 40px 0; background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%); border-radius: 8px 8px 0 0;">
+                <td style="padding: 40px 0; background: linear-gradient(135deg,rgb(15, 34, 238) 0%,rgb(242, 16, 250) 100%); border-radius: 8px 8px 0 0;">
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
                       <td align="center">
