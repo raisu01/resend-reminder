@@ -9,13 +9,23 @@ const app = express();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.use(express.json());
-import cors from 'cors';
+// ✅ CORS configuration
+const allowedOrigin = 'https://notion-clone-two-ivory.vercel.app';
 
 app.use(cors({
-  origin: 'https://notion-clone-two-ivory.vercel.app',
-  methods: ['POST', 'OPTIONS'],
+  origin: allowedOrigin,
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
 }));
+
+// ✅ Handle preflight OPTIONS request explicitly
+app.options('/send', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  return res.sendStatus(200);
+});
+
 
 const generateEmailTemplate = (data) => {
   const { subject, message } = data;
