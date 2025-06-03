@@ -7,17 +7,16 @@ import {
   VStack,
   HStack,
   Icon,
-  useColorModeValue,
   Flex,
-  Badge,
   List,
   ListItem,
   ListIcon,
 } from '@chakra-ui/react'
 import { FiMail, FiCheckCircle, FiBarChart2, FiArrowRight } from 'react-icons/fi'
 import { Link as RouterLink } from 'react-router-dom'
+import PropTypes from 'prop-types'
 
-const Feature = ({ title, description, icon }: { title: string; description: string; icon: any }) => {
+const Feature = ({ title, description, icon }) => {
   return (
     <VStack
       align="start"
@@ -45,6 +44,12 @@ const Feature = ({ title, description, icon }: { title: string; description: str
       <Text color="gray.400">{description}</Text>
     </VStack>
   )
+}
+
+Feature.propTypes = {
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  icon: PropTypes.elementType.isRequired
 }
 
 const Home = () => {
