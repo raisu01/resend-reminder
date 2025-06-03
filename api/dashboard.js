@@ -1,12 +1,11 @@
-import express from 'express';
+import { readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Stockage des requêtes en mémoire
+// Stockage des requêtes en mémoire (note: sera réinitialisé à chaque déploiement sur Vercel)
 let requests = [];
 
 // Middleware pour enregistrer les requêtes
@@ -31,17 +30,36 @@ export const logRequest = (req, res, next) => {
     oldSend.apply(res, arguments);
   };
 
-  next();
+  if (next) next();
 };
 
-// Route pour la page du tableau de bord
-router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/dashboard.html'));
-});
+// Handler pour Vercel
+export default async function handler(req, res) {
+  // Activer CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-// API pour obtenir les requêtes
-router.get('/api/requests', (req, res) => {
-  res.json(requests);
-});
+  // Gérer les requêtes OPTIONS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-export default router; 
+  // Logger la requête
+  logRequest(req, res);
+
+  // Route pour la page du tableau de bord
+  if (req.url === '/dashboard' && req.method === 'GET') {
+    const htmlContent = readFileSync(path.join(__dirname, '../public/dashboard.html'), 'utf8');
+    res.setHeader('Content-Type', 'text/html');
+    return res.send(htmlContent);
+  }
+
+  // API pour obtenir les requêtes
+  if (req.url === '/dashboard/api/requests' && req.method === 'GET') {
+    return res.json(requests);
+  }
+
+  // Route par défaut
+  return res.status(404).json({ error: 'Route non trouvée' });
+} 

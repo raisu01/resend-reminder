@@ -2,14 +2,30 @@
     "version": 2,
     "builds": [
       {
-        "src": "api/send.js",
+        "src": "api/*.js",
         "use": "@vercel/node"
+      },
+      {
+        "src": "public/**",
+        "use": "@vercel/static"
       }
     ],
     "routes": [
       {
+        "src": "/dashboard",
+        "dest": "/api/dashboard.js"
+      },
+      {
+        "src": "/dashboard/api/requests",
+        "dest": "/api/dashboard.js"
+      },
+      {
         "src": "/send",
-        "dest": "api/send.js"
+        "dest": "/api/send.js"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "/public/$1"
       }
     ]
   }
