@@ -1,45 +1,67 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { FiMail, FiPlus, FiFilter, FiCheck, FiClock, FiX, FiInbox, FiRefreshCw } from 'react-icons/fi';
+import { FiMail, FiPlus, FiFilter, FiCheck, FiClock, FiX, FiInbox, FiRefreshCw, FiSend } from 'react-icons/fi';
 import { Email } from '../types';
 
 const Dashboard: FC = () => {
   const [emails, setEmails] = useState<Email[]>([]);
   const [filter, setFilter] = useState<'all' | 'delivered' | 'pending'>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    to: '',
+    subject: '',
+    message: ''
+  });
 
   useEffect(() => {
-    const fetchEmails = async () => {
-      try {
-        // Simulation des données
-        const mockEmails: Email[] = [
-          {
-            id: 1,
-            to: 'user@example.com',
-            subject: 'Rappel important',
-            message: 'Contenu du rappel',
-            status: 'delivered',
-            sentAt: new Date().toISOString()
-          },
-          {
-            id: 2,
-            to: 'client@example.com',
-            subject: 'Suivi de commande',
-            message: 'Détails de la commande',
-            status: 'pending',
-            sentAt: new Date().toISOString()
-          }
-        ];
-        setEmails(mockEmails);
-      } catch (error) {
-        console.error('Erreur lors du chargement des emails:', error);
-      } finally {
-        setIsLoading(false);
-      }
+    // Charger les emails depuis le localStorage
+    const storedEmails = localStorage.getItem('emails');
+    if (storedEmails) {
+      setEmails(JSON.parse(storedEmails));
+    } else {
+      // Données initiales si le localStorage est vide
+      const mockEmails: Email[] = [
+        {
+          id: 1,
+          to: 'user@example.com',
+          subject: 'Rappel important',
+          message: 'Contenu du rappel',
+          status: 'delivered',
+          sentAt: new Date().toISOString()
+        },
+        {
+          id: 2,
+          to: 'client@example.com',
+          subject: 'Suivi de commande',
+          message: 'Détails de la commande',
+          status: 'pending',
+          sentAt: new Date().toISOString()
+        }
+      ];
+      setEmails(mockEmails);
+      localStorage.setItem('emails', JSON.stringify(mockEmails));
+    }
+    setIsLoading(false);
+  }, []);
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    const newEmail: Email = {
+      id: Date.now(),
+      ...formData,
+      status: 'pending',
+      sentAt: new Date().toISOString()
     };
 
-    fetchEmails();
-  }, []);
+    const updatedEmails = [...emails, newEmail];
+    setEmails(updatedEmails);
+    localStorage.setItem('emails', JSON.stringify(updatedEmails));
+
+    // Réinitialiser le formulaire
+    setFormData({ to: '', subject: '', message: '' });
+    setShowForm(false);
+  };
 
   const filteredEmails = emails.filter(email => {
     if (filter === 'all') return true;
@@ -105,7 +127,10 @@ const Dashboard: FC = () => {
                 NoRize
               </span>
             </Link>
-            <button className="group inline-flex items-center px-4 py-2 bg-gradient-to-br from-emerald-400 to-cyan-400 text-black rounded-lg font-medium hover:-translate-y-0.5 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/20">
+            <button 
+              onClick={() => setShowForm(true)}
+              className="group inline-flex items-center px-4 py-2 bg-gradient-to-br from-emerald-400 to-cyan-400 text-black rounded-lg font-medium hover:-translate-y-0.5 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/20"
+            >
               <FiPlus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
               Nouveau rappel
             </button>
@@ -115,86 +140,165 @@ const Dashboard: FC = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:border-emerald-500/20">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div className="flex items-center space-x-3">
-              <FiInbox className="w-6 h-6 text-emerald-400 animate-bounce" />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                Emails envoyés
-              </h1>
+        {showForm && (
+          <div className="mb-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:bg-white/10 transition-all duration-500">
+            {/* Effet de reflet */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-45deg] translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="relative group">
-                <select 
-                  className="appearance-none bg-white/5 border border-white/10 text-white rounded-lg pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 hover:border-emerald-400/30 transition-colors duration-300"
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value as typeof filter)}
-                >
-                  <option value="all">Tous les statuts</option>
-                  <option value="delivered">Délivrés</option>
-                  <option value="pending">En attente</option>
-                </select>
-                <FiFilter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-emerald-400 transition-colors duration-300" />
-              </div>
+            <div className="relative z-10">
+              <h2 className="text-xl font-bold text-emerald-400 mb-4">Tester un nouvel e-mail</h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="to" className="block text-sm font-medium text-gray-300 mb-1">
+                    Destinataire
+                  </label>
+                  <input
+                    type="email"
+                    id="to"
+                    value={formData.to}
+                    onChange={(e) => setFormData({ ...formData, to: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-300 mb-1">
+                    Sujet
+                  </label>
+                  <input
+                    type="text"
+                    id="subject"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-1">
+                    Message
+                  </label>
+                  <textarea
+                    id="message"
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+                    rows={4}
+                    required
+                  />
+                </div>
+                <div className="flex justify-end space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="px-4 py-2 text-gray-400 hover:text-white transition-colors duration-300"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="group inline-flex items-center px-4 py-2 bg-gradient-to-br from-emerald-400 to-cyan-400 text-black rounded-lg font-medium hover:-translate-y-0.5 transition-all duration-300"
+                  >
+                    <FiSend className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                    Envoyer
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
+        )}
 
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <FiRefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
-              <p className="text-gray-400 animate-pulse">Chargement des emails...</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Destinataire</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Sujet</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Statut</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Date d'envoi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {filteredEmails.map(email => (
-                    <tr 
-                      key={email.id}
-                      className="group hover:bg-white/5 transition-all duration-300"
-                    >
-                      <td className="py-4 px-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400/20 to-cyan-400/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                            <FiMail className="w-4 h-4 text-emerald-400" />
-                          </div>
-                          <span className="text-white group-hover:text-emerald-400 transition-colors duration-300">
-                            {email.to}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-gray-300 group-hover:text-white transition-colors duration-300">
-                        {email.subject}
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full border transition-all duration-300 ${getStatusStyle(email.status)}`}>
-                          {getStatusIcon(email.status)}
-                          <span>{getStatusText(email.status)}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
-                        {new Date(email.sentAt).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filteredEmails.length === 0 && (
-                <div className="text-center py-12 space-y-4">
-                  <FiMail className="w-12 h-12 text-gray-500 mx-auto animate-bounce" />
-                  <p className="text-gray-400">Aucun email trouvé</p>
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:border-emerald-500/20 relative overflow-hidden group hover:bg-white/10">
+          {/* Effet de reflet */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-45deg] translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+          </div>
+          <div className="relative z-10">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+              <div className="flex items-center space-x-3">
+                <FiInbox className="w-6 h-6 text-emerald-400 animate-bounce" />
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                  Emails envoyés
+                </h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="relative group">
+                  <select 
+                    className="appearance-none bg-white/5 border border-white/10 text-white rounded-lg pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 hover:border-emerald-400/30 transition-colors duration-300"
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value as typeof filter)}
+                  >
+                    <option value="all">Tous les statuts</option>
+                    <option value="delivered">Délivrés</option>
+                    <option value="pending">En attente</option>
+                  </select>
+                  <FiFilter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-emerald-400 transition-colors duration-300" />
                 </div>
-              )}
+              </div>
             </div>
-          )}
+
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                <FiRefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
+                <p className="text-gray-400 animate-pulse">Chargement des emails...</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Destinataire</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Sujet</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Statut</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Date d'envoi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {filteredEmails.map(email => (
+                      <tr 
+                        key={email.id}
+                        className="group/row hover:bg-white/5 transition-all duration-300 relative overflow-hidden"
+                      >
+                        {/* Effet de reflet pour chaque ligne */}
+                        <div className="absolute inset-0 opacity-0 group-hover/row:opacity-100 transition-opacity duration-500">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-[-45deg] translate-x-[-100%] group-hover/row:translate-x-[200%] transition-transform duration-1000"></div>
+                        </div>
+                        <td className="py-4 px-4 relative">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400/20 to-cyan-400/20 flex items-center justify-center group-hover/row:scale-110 transition-transform duration-300">
+                              <FiMail className="w-4 h-4 text-emerald-400" />
+                            </div>
+                            <span className="text-white group-hover/row:text-emerald-400 transition-colors duration-300">
+                              {email.to}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-gray-300 group-hover/row:text-white transition-colors duration-300 relative">
+                          {email.subject}
+                        </td>
+                        <td className="py-4 px-4 relative">
+                          <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full border transition-all duration-300 ${getStatusStyle(email.status)}`}>
+                            {getStatusIcon(email.status)}
+                            <span>{getStatusText(email.status)}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-gray-400 group-hover/row:text-gray-300 transition-colors duration-300 relative">
+                          {new Date(email.sentAt).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {filteredEmails.length === 0 && (
+                  <div className="text-center py-12 space-y-4">
+                    <FiMail className="w-12 h-12 text-gray-500 mx-auto animate-bounce" />
+                    <p className="text-gray-400">Aucun email trouvé</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </div>

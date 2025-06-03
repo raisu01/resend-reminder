@@ -1,11 +1,12 @@
 import { Resend } from 'resend';
 
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
   // Activer CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'https://resend-reminder.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
@@ -86,147 +87,138 @@ const generateEmailTemplate = (data) => {
   const currentYear = new Date().getFullYear();
 
   return `
-    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-    <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+    <!DOCTYPE html>
+    <html lang="fr">
     <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="x-apple-disable-message-reformatting">
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
-      <meta name="color-scheme" content="light dark">
-      <meta name="supported-color-schemes" content="light dark">
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>${subject}</title>
-      <!--[if mso]>
-      <noscript>
-        <xml>
-          <o:OfficeDocumentSettings>
-            <o:PixelsPerInch>96</o:PixelsPerInch>
-          </o:OfficeDocumentSettings>
-        </xml>
-      </noscript>
-      <![endif]-->
       <style>
-        :root {
-          color-scheme: light dark;
-          supported-color-schemes: light dark;
+        body {
+          margin: 0;
+          padding: 0;
+          background-color: #0A0A0A;
+          font-family: 'Segoe UI', Arial, sans-serif;
+          color: #E0E0E0;
         }
-        @media (prefers-color-scheme: dark) {
-          body { background-color: #0A0A0A !important; }
-          .dark-text { color: #E0E0E0 !important; }
-          .dark-bg { background-color: #1A1A1A !important; }
+        .container {
+          max-width: 600px;
+          margin: auto;
+          padding: 20px;
+          background-color: #1A1A1A;
+          border-radius: 12px;
+          border: 1px solid #2a2a2a;
+        }
+        .header {
+          text-align: center;
+          padding-bottom: 20px;
+        }
+        .logo-img {
+          width: 70px;
+          height: auto;
+          border-radius: 12px;
+        }
+        .brand {
+          margin-top: 10px;
+          font-size: 32px;
+          background: linear-gradient(135deg, #00F5A0 0%, #00D9F5 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          font-weight: bold;
+        }
+        .subject {
+          font-size: 20px;
+          font-weight: 600;
+          color: #00F5A0;
+          padding: 20px 0;
+          border-bottom: 1px solid #333;
+        }
+        .message {
+          padding: 20px 0;
+          line-height: 1.7;
+          font-size: 15px;
+          color: #CCCCCC;
+        }
+        .message p {
+          margin-bottom: 16px;
+        }
+        .signature {
+          text-align: center;
+          padding-top: 10px;
+        }
+        .signature p {
+          margin: 4px 0;
+          color: #aaa;
+          font-size: 14px;
+        }
+        .signature .team {
+          font-weight: bold;
+          font-size: 16px;
+          background: linear-gradient(135deg, #00F5A0 0%, #00D9F5 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        .footer {
+          font-size: 13px;
+          color: #999;
+          text-align: center;
+          padding-top: 30px;
+          border-top: 1px solid #2a2a2a;
+        }
+        .social a {
+          color: #888;
+          margin: 0 10px;
+          text-decoration: none;
+          font-size: 14px;
         }
         @media screen and (max-width: 600px) {
-          .mobile-padding {
-            padding: 20px !important;
+          .container {
+            padding: 16px;
           }
-          .mobile-font {
-            font-size: 16px !important;
-            line-height: 24px !important;
+          .brand {
+            font-size: 24px;
+          }
+          .subject {
+            font-size: 18px;
+          }
+          .message {
+            font-size: 14px;
           }
         }
       </style>
     </head>
-    <body style="margin: 0; padding: 0; width: 100%; word-break: break-word; -webkit-font-smoothing: antialiased; background-color: #0A0A0A; color: #E0E0E0;">
-      <!--[if mso]>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="background-color: #0A0A0A;">
-      <![endif]-->
-      <div style="max-width: 600px; margin: 0 auto;">
-        <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; margin: 0 auto; background: linear-gradient(45deg, #0A0A0A 0%, #1A1A1A 100%);">
-          <tr>
-            <td align="center" class="mobile-padding" style="padding: 40px 20px;">
-              <!-- Logo et En-tête -->
-              <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 400px; margin-bottom: 30px;">
-                <tr>
-                  <td align="center">
-                    <table role="presentation" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td align="center" style="background: linear-gradient(135deg, #00F5A0 0%, #00D9F5 100%); width: 60px; height: 60px; border-radius: 20px;">
-                          <span style="color: #000000; font-size: 24px; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif;">N</span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td align="center" style="padding-top: 15px;">
-                          <h1 style="margin: 0; font-family: 'Segoe UI', Arial, sans-serif; font-size: 36px; background: linear-gradient(135deg, #00F5A0 0%, #00D9F5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px;">NoRize</h1>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
+    <body>
+      <div class="container">
+        <div class="header">
+          <img class="logo-img" src="https://resend-reminder.vercel.app/client/public/logo.png  " alt="Logo NoRize" />
+          <div class="brand">NoRize</div>
+        </div>
 
-              <!-- Carte Principale -->
-              <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; background: rgba(255, 255, 255, 0.03); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden;">
-                <!-- En-tête de la Carte -->
-                <tr>
-                  <td class="mobile-padding" style="padding: 40px; background: linear-gradient(45deg, rgba(0, 245, 160, 0.05) 0%, rgba(0, 217, 245, 0.05) 100%);">
-                    <h2 style="margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: #00F5A0; font-size: 24px; font-weight: 500;">${subject}</h2>
-                  </td>
-                </tr>
+        <div class="subject">${subject}</div>
 
-                <!-- Contenu du Message -->
-                <tr>
-                  <td class="mobile-padding" style="padding: 35px 40px;">
-                    ${message.split('\n').map(paragraph => `
-                      <p class="mobile-font dark-text" style="font-family: 'Segoe UI', Arial, sans-serif; color: #E0E0E0; font-size: 16px; line-height: 1.6; margin: 0 0 15px 0; letter-spacing: 0.3px;">
-                        ${paragraph}
-                      </p>
-                    `).join('')}
-                  </td>
-                </tr>
+        <div class="message">
+          ${message
+            .split('\n')
+            .filter(line => line.trim() !== '')
+            .map(line => `<p>${line.trim()}</p>`)
+            .join('')}
+        </div>
 
-                <!-- Séparateur -->
-                <tr>
-                  <td>
-                    <div style="height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);"></div>
-                  </td>
-                </tr>
+        <div class="signature">
+          <p>Cordialement,</p>
+          <p class="team">L'équipe NoRize</p>
+        </div>
 
-                <!-- Signature -->
-                <tr>
-                  <td class="mobile-padding" align="center" style="padding: 35px 40px;">
-                    <p style="margin: 0 0 5px 0; font-family: 'Segoe UI', Arial, sans-serif; color: #B0B0B0; font-size: 15px;">Cordialement,</p>
-                    <p style="margin: 0; font-family: 'Segoe UI', Arial, sans-serif; font-size: 18px; font-weight: 600; background: linear-gradient(135deg, #00F5A0 0%, #00D9F5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">L'équipe NoRize</p>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Pied de Page -->
-              <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 400px; margin-top: 40px;">
-                <tr>
-                  <td align="center">
-                    <!-- Liens Sociaux -->
-                    <table role="presentation" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="padding: 0 10px;">
-                          <a href="#" style="color: #808080; text-decoration: none; font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px;">LinkedIn</a>
-                        </td>
-                        <td style="padding: 0 10px;">
-                          <a href="#" style="color: #808080; text-decoration: none; font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px;">Twitter</a>
-                        </td>
-                        <td style="padding: 0 10px;">
-                          <a href="#" style="color: #808080; text-decoration: none; font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px;">Website</a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding-top: 20px;">
-                    <p style="margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: #666666; font-size: 13px;">
-                      © ${currentYear} NoRize. Tous droits réservés.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
+        <div class="footer">
+          <div class="social">
+            <a href="#">LinkedIn</a> |
+            <a href="#">Twitter</a> |
+            <a href="#">Site Web</a>
+          </div>
+          <p style="margin-top: 10px;">© ${currentYear} NoRize. Tous droits réservés.</p>
+        </div>
       </div>
-      <!--[if mso]>
-      </td></tr></table>
-      <![endif]-->
     </body>
     </html>
   `;
-}; 
+};
