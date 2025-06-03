@@ -9,103 +9,126 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.use(express.json());
 
-app.post('/sendReminder', async (req, res) => {
-  const data = req.body;
+app.post('/send', async (req, res) => {
+  const { to, subject, message } = req.body;
 
-  if (!data || !data.toEmail || !data.clientName || !data.accountName || !data.expiryDate || data.daysUntilExpiry === undefined) {
-    return res.status(400).json({ success: false, message: 'Données incomplètes.' });
+  if (!to || !subject || !message) {
+    return res.status(400).json({ success: false, message: 'Champs "to", "subject" et "message" requis.' });
   }
 
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #333; margin: 0;">Rappel d'expiration de compte</h1>
-      </div>
-      
-      <div style="background-color: ${
-        data.daysUntilExpiry <= 0 ? '#ffebee' : 
-        data.daysUntilExpiry <= 10 ? '#fff3e0' : '#e8f5e9'
-      }; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-        <p style="color: ${
-          data.daysUntilExpiry <= 0 ? '#c62828' :
-          data.daysUntilExpiry <= 10 ? '#ef6c00' : '#2e7d32'
-        }; font-size: 18px; font-weight: bold; margin: 0;">
-          ${data.daysUntilExpiry <= 0 
-            ? '⚠️ Action immédiate requise'
-            : data.daysUntilExpiry <= 10
-            ? '⚠️ Attention : Expiration proche'
-            : '✅ Compte actif'}
-        </p>
-      </div>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>NoRize - ${subject}</title>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif;">
+      <table cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%; background-color: #f4f4f4;">
+        <tr>
+          <td align="center" style="padding: 40px 0;">
+            <table cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <!-- En-tête -->
+              <tr>
+                <td style="padding: 40px 0; background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%); border-radius: 8px 8px 0 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td align="center">
+                        <h1 style="margin: 0; font-size: 32px; color: #ffffff; text-transform: uppercase; letter-spacing: 2px;">NoRize</h1>
+                        <p style="margin: 10px 0 0; color: #ffffff; font-size: 16px; opacity: 0.9;">Solutions Professionnelles</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
 
-      <div style="margin-bottom: 30px;">
-        <p style="color: #666; font-size: 16px; line-height: 1.5;">
-          Bonjour,<br><br>
-          Nous vous informons que le compte de <strong>${data.clientName}</strong> pour <strong>${data.accountName}</strong> 
-          ${data.daysUntilExpiry <= 0 ? 'a expiré' : `expire dans ${data.daysUntilExpiry} jours`}.
-        </p>
-        <p style="color: #666; font-size: 16px; line-height: 1.5;">
-          Date d'expiration : <strong>${data.expiryDate}</strong>
-        </p>
-      </div>
+              <!-- Contenu -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding: 0 0 20px;">
+                        <div style="background-color: #f8f9fa; border-left: 4px solid #1a237e; padding: 20px; margin-bottom: 30px;">
+                          <p style="color: #2c3e50; font-size: 16px; line-height: 1.6; margin: 0;">
+                            ${message.replace(/\n/g, '</p><p style="color: #2c3e50; font-size: 16px; line-height: 1.6; margin: 12px 0 0;">')}
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
 
-      <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-        <p style="color: #333; font-size: 16px; margin: 0;">
-          ${data.daysUntilExpiry <= 0 
-            ? 'Votre compte a expiré. Veuillez le renouveler dès que possible pour éviter toute interruption de service.'
-            : data.daysUntilExpiry <= 10
-            ? 'Votre compte arrive bientôt à expiration. Pensez à le renouveler pour éviter toute interruption de service.'
-            : 'Votre compte est toujours actif. Cette notification est envoyée à titre préventif.'}
-        </p>
-      </div>
-
-      <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-        <p style="color: #666; font-size: 14px; margin: 0;">
-          Cordialement,<br>
-          <strong>L'équipe NoRize</strong>
-        </p>
-      </div>
-    </div>
+              <!-- Pied de page -->
+              <tr>
+                <td style="padding: 30px; background-color: #f8f9fa; border-radius: 0 0 8px 8px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td align="center">
+                        <p style="margin: 0; color: #666; font-size: 14px;">Cordialement,</p>
+                        <p style="margin: 8px 0 0; color: #1a237e; font-weight: bold; font-size: 16px;">L'équipe NoRize</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center" style="padding-top: 20px;">
+                        <p style="margin: 0; color: #999; font-size: 12px;">© ${new Date().getFullYear()} NoRize. Tous droits réservés.</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
   `;
 
   const text = `
-Rappel d'expiration de compte
+NoRize
+-------
+${subject}
+-------
 
-Bonjour,
-
-Nous vous informons que le compte de ${data.clientName} pour ${data.accountName} 
-${data.daysUntilExpiry <= 0 ? 'a expiré' : `expire dans ${data.daysUntilExpiry} jours`}.
-
-Date d'expiration : ${data.expiryDate}
-
-${data.daysUntilExpiry <= 0 
-  ? 'Votre compte a expiré. Veuillez le renouveler dès que possible pour éviter toute interruption de service.'
-  : data.daysUntilExpiry <= 10
-  ? 'Votre compte arrive bientôt à expiration. Pensez à le renouveler pour éviter toute interruption de service.'
-  : 'Votre compte est toujours actif. Cette notification est envoyée à titre préventif.'}
+${message}
 
 Cordialement,
 L'équipe NoRize
+
+© ${new Date().getFullYear()} NoRize. Tous droits réservés.
   `;
 
   try {
     const { error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'NoRize <onboarding@resend.dev>',
-      to: data.toEmail,
-      subject: `Rappel d'expiration - ${data.accountName}`,
-      text,
+      from: process.env.EMAIL_FROM || 'NoRize <contact@norize.com>',
+      to,
+      subject: `NoRize - ${subject}`,
       html,
+      text,
     });
 
     if (error) {
       console.error('Erreur Resend:', error);
-      return res.status(500).json({ success: false, message: error.message });
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Erreur lors de l\'envoi de l\'email',
+        error: error.message 
+      });
     }
 
-    res.status(200).json({ success: true, message: 'Rappel envoyé avec succès' });
+    res.status(200).json({ 
+      success: true, 
+      message: 'Email envoyé avec succès' 
+    });
   } catch (err) {
-    console.error('Erreur d'envoi:', err);
-    res.status(500).json({ success: false, message: 'Erreur lors de l'envoi de l'email' });
+    console.error('Erreur d\'envoi:', err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erreur lors de l\'envoi de l\'email',
+      error: err.message 
+    });
   }
 });
 
@@ -113,4 +136,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Serveur lancé sur le port ${PORT}`);
 });
-
