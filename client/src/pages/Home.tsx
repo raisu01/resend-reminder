@@ -1,5 +1,6 @@
 import { FiMail, FiCheckCircle, FiBarChart2, FiArrowRight, FiZap, FiRefreshCw, FiBook } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
+import logo from '../../public/logo.png'
 
 const features = [
   {
@@ -32,7 +33,7 @@ const Home = () => {
         {/* Hero Section */}
         <div className="flex flex-col items-center text-center space-y-6 mb-20">
           <div className="w-20 h-20 rounded-2xl flex items-center justify-center bg-gradient-to-br from-emerald-400 to-cyan-400 transform hover:rotate-6 transition-transform duration-300 hover:shadow-lg hover:shadow-emerald-500/25">
-            <span className="text-4xl font-bold text-black">N</span>
+            <span className="text-4xl font-bold text-black"><img src={logo} alt="Logo" className="w-10 h-10" /></span>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent animate-gradient">
             NoRize Reminder

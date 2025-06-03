@@ -7,7 +7,7 @@ interface CodeExample {
 }
 
 const Documentation: FC = () => {
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['curl']);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('curl');
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
 
   const languages = [
@@ -143,12 +143,8 @@ System.out.println(response.body());`
     }
   };
 
-  const handleLanguageToggle = (languageId: string) => {
-    setSelectedLanguages(prev => 
-      prev.includes(languageId)
-        ? prev.filter(id => id !== languageId)
-        : [...prev, languageId]
-    );
+  const handleLanguageSelect = (languageId: string) => {
+    setSelectedLanguage(languageId);
   };
 
   const handleCopyCode = async (languageId: string, code: string) => {
@@ -205,72 +201,62 @@ System.out.println(response.body());`
 
         {/* Language Selection */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-emerald-400 mb-4">Sélectionnez vos langages</h2>
+          <h2 className="text-xl font-bold text-emerald-400 mb-4">Sélectionnez un langage</h2>
           <div className="flex flex-wrap gap-4">
             {languages.map(lang => (
-              <label
+              <button
                 key={lang.id}
-                className="flex items-center space-x-2 cursor-pointer group"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedLanguages.includes(lang.id)}
-                  onChange={() => handleLanguageToggle(lang.id)}
-                  className="hidden"
-                />
-                <div className={`px-4 py-2 rounded-full border transition-all duration-300 ${
-                  selectedLanguages.includes(lang.id)
-                    ? 'bg-emerald-400/20 border-emerald-400/50 text-emerald-400'
+                onClick={() => handleLanguageSelect(lang.id)}
+                className={`px-4 py-2 rounded-full border transition-all duration-300 ${
+                  selectedLanguage === lang.id
+                    ? 'bg-emerald-400/20 border-emerald-400/50 text-emerald-400 shadow-lg shadow-emerald-500/20'
                     : 'border-white/10 text-gray-400 hover:border-emerald-400/30'
-                }`}>
-                  <span>{lang.name}</span>
-                </div>
-              </label>
+                }`}
+              >
+                {lang.name}
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Code Examples */}
+        {/* Code Example */}
         <div className="space-y-8">
-          {selectedLanguages.map(langId => (
-            <div
-              key={langId}
-              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:bg-white/10 transition-all duration-500"
-            >
-              {/* Effet de reflet */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-45deg] translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-              </div>
-              <div className="relative z-10">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-emerald-400">
-                    {languages.find(l => l.id === langId)?.name}
-                  </h3>
-                  <button
-                    onClick={() => handleCopyCode(langId, codeExamples[langId].code)}
-                    className="flex items-center space-x-2 text-sm text-gray-400 hover:text-emerald-400 transition-colors duration-300"
-                  >
-                    {copiedStates[langId] ? (
-                      <>
-                        <FiCheck className="w-4 h-4" />
-                        <span>Copié!</span>
-                      </>
-                    ) : (
-                      <>
-                        <FiCopy className="w-4 h-4" />
-                        <span>Copier</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-                <pre className="bg-black/50 p-4 rounded-lg overflow-x-auto">
-                  <code className={`language-${codeExamples[langId].language}`}>
-                    {codeExamples[langId].code}
-                  </code>
-                </pre>
-              </div>
+          <div
+            className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:bg-white/10 transition-all duration-500"
+          >
+            {/* Effet de reflet */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-45deg] translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
             </div>
-          ))}
+            <div className="relative z-10">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-emerald-400">
+                  {languages.find(l => l.id === selectedLanguage)?.name}
+                </h3>
+                <button
+                  onClick={() => handleCopyCode(selectedLanguage, codeExamples[selectedLanguage].code)}
+                  className="flex items-center space-x-2 text-sm text-gray-400 hover:text-emerald-400 transition-colors duration-300"
+                >
+                  {copiedStates[selectedLanguage] ? (
+                    <>
+                      <FiCheck className="w-4 h-4" />
+                      <span>Copié!</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiCopy className="w-4 h-4" />
+                      <span>Copier</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <pre className="bg-black/50 p-4 rounded-lg overflow-x-auto">
+                <code className={`language-${codeExamples[selectedLanguage].language}`}>
+                  {codeExamples[selectedLanguage].code}
+                </code>
+              </pre>
+            </div>
+          </div>
         </div>
       </div>
     </div>

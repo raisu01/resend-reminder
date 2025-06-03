@@ -190,7 +190,7 @@ const generateEmailTemplate = (data) => {
     <body>
       <div class="container">
         <div class="header">
-          <img class="logo-img" src="https://resend-reminder.vercel.app/client/public/logo.png  " alt="Logo NoRize" />
+          <img class="logo-img" src="https://resend-reminder.vercel.app/fulllogo.png" alt="Logo NoRize" />
           <div class="brand">NoRize</div>
         </div>
 

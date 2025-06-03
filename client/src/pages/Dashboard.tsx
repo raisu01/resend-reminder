@@ -2,8 +2,8 @@ import { FC, useState, useEffect, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { FiMail, FiPlus, FiFilter, FiCheck, FiClock, FiX, FiInbox, FiRefreshCw, FiSend } from 'react-icons/fi';
 import { Email } from '../types';
-
-const API_URL = 'https://resend-reminder.vercel.app/api';
+import logo from '../../public/logo.png'
+import { sendEmail, checkEmailStatus } from '../services/api';
 
 const Dashboard: FC = () => {
   const [emails, setEmails] = useState<Email[]>([]);
@@ -32,16 +32,13 @@ const Dashboard: FC = () => {
       
       for (const email of pendingEmails) {
         try {
-          const response = await fetch(`${API_URL}/status/${email.id}`);
-          if (response.ok) {
-            const { status } = await response.json();
-            if (status !== email.status) {
-              const updatedEmails = emails.map(e => 
-                e.id === email.id ? { ...e, status } : e
-              );
-              setEmails(updatedEmails);
-              localStorage.setItem('emails', JSON.stringify(updatedEmails));
-            }
+          const response = await checkEmailStatus(email.id);
+          if (response.success && response.status !== email.status) {
+            const updatedEmails = emails.map(e => 
+              e.id === email.id ? { ...e, status: response.status as Email['status'] } : e
+            );
+            setEmails(updatedEmails);
+            localStorage.setItem('emails', JSON.stringify(updatedEmails));
           }
         } catch (error) {
           console.error(`Erreur lors de la vérification du statut pour l'email ${email.id}:`, error);
@@ -49,7 +46,7 @@ const Dashboard: FC = () => {
       }
     };
 
-    const interval = setInterval(checkPendingEmails, 5000); // Vérifier toutes les 5 secondes
+    const interval = setInterval(checkPendingEmails, 5000);
     return () => clearInterval(interval);
   }, [emails]);
 
@@ -60,7 +57,7 @@ const Dashboard: FC = () => {
     try {
       // Créer un nouvel email avec le statut initial "pending"
       const newEmail: Email = {
-        id: Date.now(), // ID temporaire
+        id: Date.now(),
         ...formData,
         status: 'pending',
         sentAt: new Date().toISOString()
@@ -72,36 +69,29 @@ const Dashboard: FC = () => {
       localStorage.setItem('emails', JSON.stringify(updatedEmails));
 
       // Envoyer l'email via l'API
-      const response = await fetch(`${API_URL}/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
+      const response = await sendEmail({
+        to: formData.to,
+        subject: formData.subject,
+        text: formData.message
       });
 
-      if (!response.ok) throw new Error('Erreur lors de l\'envoi de l\'email');
-
-      const { id, status } = await response.json();
-
-      // Mettre à jour l'email avec l'ID et le statut retournés par l'API
+      // Mettre à jour l'email avec le statut retourné par l'API
       const finalUpdatedEmails = updatedEmails.map(email => 
-        email.id === newEmail.id ? { ...email, id, status } : email
+        email.id === newEmail.id ? { 
+          ...email,
+          status: response.status
+        } : email
       );
       setEmails(finalUpdatedEmails);
       localStorage.setItem('emails', JSON.stringify(finalUpdatedEmails));
 
-      // Réinitialiser le formulaire
-      setFormData({ to: '', subject: '', message: '' });
-      setShowForm(false);
+      // Réinitialiser le formulaire si l'envoi est réussi
+      if (response.success) {
+        setFormData({ to: '', subject: '', message: '' });
+        setShowForm(false);
+      }
     } catch (error) {
       console.error('Erreur lors de l\'envoi:', error);
-      // En cas d'erreur, marquer l'email comme échoué
-      const failedEmails = emails.map(email => 
-        email.id === Date.now() ? { ...email, status: 'failed' as const } : email
-      );
-      setEmails(failedEmails);
-      localStorage.setItem('emails', JSON.stringify(failedEmails));
     } finally {
       setIsLoading(false);
     }
@@ -165,7 +155,7 @@ const Dashboard: FC = () => {
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center space-x-3 group">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-emerald-400 to-cyan-400 group-hover:rotate-6 transition-transform duration-300">
-                <span className="text-lg font-bold text-black">N</span>
+                <span className="text-lg font-bold text-black"><img src={logo} alt="Logo" className="w-10 h-10" /></span>
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                 NoRize
