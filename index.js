@@ -22,21 +22,23 @@ app.post('/send', async (req, res) => {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="color-scheme" content="dark light">
       <title>NoRize - ${subject}</title>
     </head>
-    <body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif;">
-      <table cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%; background-color: #f4f4f4;">
+    <body style="margin: 0; padding: 0; background-color: #121212; font-family: Arial, sans-serif;">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%; background-color: #121212;">
         <tr>
-          <td align="center" style="padding: 40px 0;">
-            <table cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(248, 241, 241, 0.1);">
+          <td align="center" style="padding: 20px 10px;">
+            <!-- Container principal - Responsive -->
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 600px; background-color: #1E1E1E; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);">
               <!-- En-tête -->
               <tr>
-                <td style="padding: 40px 0; background: linear-gradient(135deg,rgb(15, 34, 238) 0%,rgb(242, 16, 250) 100%); border-radius: 8px 8px 0 0;">
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                <td style="padding: 40px 0; background: linear-gradient(135deg, rgb(15, 34, 238) 0%, rgb(242, 16, 250) 100%); border-radius: 12px 12px 0 0;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
                       <td align="center">
-                        <h1 style="margin: 0; font-size: 32px; color: #ffffff; text-transform: uppercase; letter-spacing: 2px;">NoRize</h1>
-                        <p style="margin: 10px 0 0; color: #ffffff; font-size: 16px; opacity: 0.9;">Solutions Professionnelles</p>
+                        <h1 style="margin: 0; font-size: clamp(24px, 5vw, 32px); color: #ffffff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">NoRize</h1>
+                        <p style="margin: 10px 0 0; color: rgba(255,255,255,0.9); font-size: clamp(14px, 3vw, 16px);">Solutions Professionnelles</p>
                       </td>
                     </tr>
                   </table>
@@ -45,13 +47,13 @@ app.post('/send', async (req, res) => {
 
               <!-- Contenu -->
               <tr>
-                <td style="padding: 40px 30px;">
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                <td style="padding: clamp(20px, 4vw, 40px) clamp(15px, 3vw, 30px);">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td style="padding: 0 0 20px;">
-                        <div style="background-color: #f8f9fa; border-left: 4px solid #1a237e; padding: 20px; margin-bottom: 30px;">
-                          <p style="color: #2c3e50; font-size: 16px; line-height: 1.6; margin: 0;">
-                            ${message.replace(/\n/g, '</p><p style="color: #2c3e50; font-size: 16px; line-height: 1.6; margin: 12px 0 0;">')}
+                      <td>
+                        <div style="background-color: #2D2D2D; border-left: 4px solid rgb(242, 16, 250); padding: clamp(15px, 3vw, 25px); margin-bottom: 30px; border-radius: 0 8px 8px 0;">
+                          <p style="color: #E0E0E0; font-size: clamp(14px, 3vw, 16px); line-height: 1.6; margin: 0;">
+                            ${message.replace(/\n/g, '</p><p style="color: #E0E0E0; font-size: clamp(14px, 3vw, 16px); line-height: 1.6; margin: 12px 0 0;">')}
                           </p>
                         </div>
                       </td>
@@ -62,17 +64,17 @@ app.post('/send', async (req, res) => {
 
               <!-- Pied de page -->
               <tr>
-                <td style="padding: 30px; background-color: #f8f9fa; border-radius: 0 0 8px 8px;">
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                <td style="padding: clamp(20px, 4vw, 30px); background-color: #2D2D2D; border-radius: 0 0 12px 12px;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
                       <td align="center">
-                        <p style="margin: 0; color: #666; font-size: 14px;">Cordialement,</p>
-                        <p style="margin: 8px 0 0; color: #1a237e; font-weight: bold; font-size: 16px;">L'équipe NoRize</p>
+                        <p style="margin: 0; color: #B0B0B0; font-size: clamp(12px, 2.5vw, 14px);">Cordialement,</p>
+                        <p style="margin: 8px 0 0; background: linear-gradient(135deg, rgb(15, 34, 238) 0%, rgb(242, 16, 250) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; font-size: clamp(14px, 3vw, 16px);">L'équipe NoRize</p>
                       </td>
                     </tr>
                     <tr>
-                      <td align="center" style="padding-top: 20px;">
-                        <p style="margin: 0; color: #999; font-size: 12px;">© ${new Date().getFullYear()} NoRize. Tous droits réservés.</p>
+                      <td align="center" style="padding-top: clamp(15px, 3vw, 20px);">
+                        <p style="margin: 0; color: #808080; font-size: clamp(10px, 2vw, 12px);">© ${new Date().getFullYear()} NoRize. Tous droits réservés.</p>
                       </td>
                     </tr>
                   </table>
