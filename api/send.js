@@ -2,55 +2,80 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { Resend } from 'resend';
 import cors from 'cors';
-import dashboard, { logRequest } from './dashboard.js';
+import { logRequest } from './dashboard.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config();
-
 const app = express();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Middleware pour servir les fichiers statiques de React
-app.use(express.static(path.join(__dirname, '../client/dist')));
-
+// Middleware pour servir les fichiers statiques React build
+app.use(express.static(path.resolve(__dirname, '../client/dist')));
 app.use(express.json());
-// ✅ CORS configuration
-const allowedOrigin = 'https://notion-clone-two-ivory.vercel.app';
 
-app.use(cors({
-  origin: allowedOrigin,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Access-Control-Allow-Methods',
-    'Access-Control-Allow-Headers',
-    'Access-Control-Allow-Origin'
-  ],
-  credentials: true
-}));
+// CORS configuration
+app.use(cors());
 
-// Middleware de logging pour toutes les requêtes
+// Middleware de log global
 app.use(logRequest);
 
-// Route du tableau de bord
-app.use('/dashboard', dashboard);
+// Route d'envoi d'email
+app.post('/api/send', async (req, res) => {
+  const { to, subject, message } = req.body;
+  if (!to || !subject || !message) {
+    return res.status(400).json({
+      success: false,
+      message: 'Champs "to", "subject" et "message" requis.'
+    });
+  }
 
-// ✅ Handle preflight OPTIONS request explicitly
-app.options('/send', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', [
-    'Content-Type',
-    'Access-Control-Allow-Methods',
-    'Access-Control-Allow-Headers',
-    'Access-Control-Allow-Origin'
-  ].join(', '));
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  return res.sendStatus(200);
+  try {
+    const { error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'NoRize <contact@norize.com>',
+      to,
+      subject: `NoRize - ${subject}`,
+      html: generateEmailTemplate({ subject, message }),
+      text: `
+NoRize
+-------
+${subject}
+-------
+
+${message}
+
+Cordialement,
+L'équipe NoRize
+
+© ${new Date().getFullYear()} NoRize. Tous droits réservés.
+      `
+    });
+
+    if (error) {
+      console.error('Erreur Resend:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Erreur lors de l\'envoi de l\'email',
+        error: error.message
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Email envoyé avec succès'
+    });
+  } catch (err) {
+    console.error('Erreur d\'envoi:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de l\'envoi de l\'email',
+      error: err.message
+    });
+  }
 });
 
 const generateEmailTemplate = (data) => {
@@ -203,71 +228,13 @@ const generateEmailTemplate = (data) => {
   `;
 };
 
-app.post('/send', async (req, res) => {
-  const { to, subject, message } = req.body;
-
-  if (!to || !subject || !message) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'Champs "to", "subject" et "message" requis.' 
-    });
-  }
-
-  const emailData = {
-    subject,
-    message
-  };
-
-  try {
-    const { error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'NoRize <contact@norize.com>',
-      to,
-      subject: `NoRize - ${subject}`,
-      html: generateEmailTemplate(emailData),
-      text: `
-NoRize
--------
-${subject}
--------
-
-${message}
-
-Cordialement,
-L'équipe NoRize
-
-© ${new Date().getFullYear()} NoRize. Tous droits réservés.
-      `
-    });
-
-    if (error) {
-      console.error('Erreur Resend:', error);
-      return res.status(500).json({ 
-        success: false, 
-        message: 'Erreur lors de l\'envoi de l\'email',
-        error: error.message 
-      });
-    }
-
-    res.status(200).json({ 
-      success: true, 
-      message: 'Email envoyé avec succès' 
-    });
-  } catch (err) {
-    console.error('Erreur d\'envoi:', err);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Erreur lors de l\'envoi de l\'email',
-      error: err.message 
-    });
-  }
-});
-
-// Route pour servir l'application React pour toutes les autres routes
+// Catch-all route pour servir l'application React
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  res.sendFile(path.resolve(__dirname, '../client/dist/index.html'));
 });
 
+// Démarrer le serveur
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Serveur lancé sur le port ${PORT}`);
-}); 
+});
