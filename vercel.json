@@ -6,15 +6,18 @@
         "use": "@vercel/node"
       },
       {
-        "src": "client",
+        "src": "client/package.json",
         "use": "@vercel/static-build",
         "config": {
-          "buildCommand": "cd client && npm install && npm run build",
-          "outputDirectory": "client/dist"
+          "distDir": "dist"
         }
       }
     ],
     "routes": [
+      {
+        "src": "/api/(.*)",
+        "dest": "/api/$1.js"
+      },
       {
         "src": "/dashboard/api/requests",
         "dest": "/api/dashboard.js"
@@ -24,12 +27,18 @@
         "dest": "/api/send.js"
       },
       {
-        "src": "/(.*)",
-        "dest": "/client/dist/$1",
-        "continue": true
+        "handle": "filesystem"
       },
       {
-        "src": "/[^.]+",
+        "src": "/assets/(.*)",
+        "dest": "/client/dist/assets/$1"
+      },
+      {
+        "src": "/favicon.ico",
+        "dest": "/client/dist/favicon.ico"
+      },
+      {
+        "src": "/(.*)",
         "dest": "/client/dist/index.html"
       }
     ]
