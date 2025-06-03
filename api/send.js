@@ -2,11 +2,20 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { Resend } from 'resend';
 import cors from 'cors';
+import dashboard, { logRequest } from './dashboard.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
 const app = express();
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Middleware pour servir les fichiers statiques
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(express.json());
 // ✅ CORS configuration
@@ -15,14 +24,32 @@ const allowedOrigin = 'https://notion-clone-two-ivory.vercel.app';
 app.use(cors({
   origin: allowedOrigin,
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
+  allowedHeaders: [
+    'Content-Type',
+    'Access-Control-Allow-Methods',
+    'Access-Control-Allow-Headers',
+    'Access-Control-Allow-Origin'
+  ],
+  credentials: true
 }));
+
+// Middleware de logging pour toutes les requêtes
+app.use(logRequest);
+
+// Route du tableau de bord
+app.use('/dashboard', dashboard);
 
 // ✅ Handle preflight OPTIONS request explicitly
 app.options('/send', (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', [
+    'Content-Type',
+    'Access-Control-Allow-Methods',
+    'Access-Control-Allow-Headers',
+    'Access-Control-Allow-Origin'
+  ].join(', '));
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   return res.sendStatus(200);
 });
 
