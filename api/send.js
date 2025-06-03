@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { Resend } from 'resend';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -8,15 +9,19 @@ const app = express();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.use(express.json());
+import cors from 'cors';
 
-app.post('/send', async (req, res) => {
-  const { to, subject, message } = req.body;
+app.use(cors({
+  origin: 'https://notion-clone-two-ivory.vercel.app',
+  methods: ['POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+}));
 
-  if (!to || !subject || !message) {
-    return res.status(400).json({ success: false, message: 'Champs "to", "subject" et "message" requis.' });
-  }
+const generateEmailTemplate = (data) => {
+  const { subject, message } = data;
+  const currentYear = new Date().getFullYear();
 
-  const html = `
+  return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -25,59 +30,65 @@ app.post('/send', async (req, res) => {
       <meta name="color-scheme" content="dark light">
       <title>NoRize - ${subject}</title>
     </head>
-    <body style="margin: 0; padding: 0; background-color: #121212; font-family: Arial, sans-serif;">
-      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%; background-color: #121212;">
+    <body style="margin: 0; padding: 0; background-color: #0A0A0A; font-family: 'Segoe UI', Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%; background: linear-gradient(45deg, #0A0A0A 0%, #1A1A1A 100%);">
         <tr>
-          <td align="center" style="padding: 20px 10px;">
-            <!-- Container principal - Responsive -->
-            <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 600px; background-color: #1E1E1E; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);">
-              <!-- En-tête -->
+          <td align="center" style="padding: 40px 10px;">
+            <!-- Container Principal -->
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 600px;">
+              <!-- Logo et En-tête -->
               <tr>
-                <td style="padding: 40px 0; background: linear-gradient(135deg, rgb(15, 34, 238) 0%, rgb(242, 16, 250) 100%); border-radius: 12px 12px 0 0;">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="center">
-                        <h1 style="margin: 0; font-size: clamp(24px, 5vw, 32px); color: #ffffff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">NoRize</h1>
-                        <p style="margin: 10px 0 0; color: rgba(255,255,255,0.9); font-size: clamp(14px, 3vw, 16px);">Solutions Professionnelles</p>
-                      </td>
-                    </tr>
-                  </table>
+                <td align="center" style="padding-bottom: 30px;">
+                  <div style="background: linear-gradient(135deg, #00F5A0 0%, #00D9F5 100%); width: 60px; height: 60px; border-radius: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center;">
+                    <span style="color: #000; font-size: 24px; font-weight: bold;">N</span>
+                  </div>
+                  <h1 style="margin: 0; font-size: clamp(28px, 5vw, 36px); background: linear-gradient(135deg, #00F5A0 0%, #00D9F5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px;">NoRize</h1>
                 </td>
               </tr>
 
-              <!-- Contenu -->
+              <!-- Carte Principale -->
               <tr>
-                <td style="padding: clamp(20px, 4vw, 40px) clamp(15px, 3vw, 30px);">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td>
-                        <div style="background-color: #2D2D2D; border-left: 4px solid rgb(242, 16, 250); padding: clamp(15px, 3vw, 25px); margin-bottom: 30px; border-radius: 0 8px 8px 0;">
-                          <p style="color: #E0E0E0; font-size: clamp(14px, 3vw, 16px); line-height: 1.6; margin: 0;">
-                            ${message.replace(/\n/g, '</p><p style="color: #E0E0E0; font-size: clamp(14px, 3vw, 16px); line-height: 1.6; margin: 12px 0 0;">')}
-                          </p>
-                        </div>
-                      </td>
-                    </tr>
-                  </table>
+                <td>
+                  <div style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden;">
+                    <!-- En-tête de la Carte -->
+                    <div style="padding: clamp(30px, 5vw, 40px) clamp(20px, 4vw, 40px); background: linear-gradient(45deg, rgba(0, 245, 160, 0.05) 0%, rgba(0, 217, 245, 0.05) 100%);">
+                      <h2 style="margin: 0; color: #00F5A0; font-size: clamp(20px, 4vw, 24px); font-weight: 500;">${subject}</h2>
+                    </div>
+
+                    <!-- Contenu du Message -->
+                    <div style="padding: clamp(25px, 4vw, 35px) clamp(20px, 4vw, 40px);">
+                      ${message.split('\n').map(paragraph => `
+                        <p style="color: #E0E0E0; font-size: clamp(15px, 3vw, 16px); line-height: 1.6; margin: 0 0 15px 0; letter-spacing: 0.3px;">
+                          ${paragraph}
+                        </p>
+                      `).join('')}
+                    </div>
+
+                    <!-- Séparateur -->
+                    <div style="height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);"></div>
+
+                    <!-- Signature -->
+                    <div style="padding: clamp(25px, 4vw, 35px) clamp(20px, 4vw, 40px); text-align: center;">
+                      <p style="margin: 0 0 5px 0; color: #B0B0B0; font-size: clamp(14px, 2.5vw, 15px);">Cordialement,</p>
+                      <p style="margin: 0; font-size: clamp(16px, 3vw, 18px); font-weight: 600; background: linear-gradient(135deg, #00F5A0 0%, #00D9F5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">L'équipe NoRize</p>
+                    </div>
+                  </div>
                 </td>
               </tr>
 
-              <!-- Pied de page -->
+              <!-- Pied de Page -->
               <tr>
-                <td style="padding: clamp(20px, 4vw, 30px); background-color: #2D2D2D; border-radius: 0 0 12px 12px;">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="center">
-                        <p style="margin: 0; color: #B0B0B0; font-size: clamp(12px, 2.5vw, 14px);">Cordialement,</p>
-                        <p style="margin: 8px 0 0; background: linear-gradient(135deg, rgb(15, 34, 238) 0%, rgb(242, 16, 250) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; font-size: clamp(14px, 3vw, 16px);">L'équipe NoRize</p>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td align="center" style="padding-top: clamp(15px, 3vw, 20px);">
-                        <p style="margin: 0; color: #808080; font-size: clamp(10px, 2vw, 12px);">© ${new Date().getFullYear()} NoRize. Tous droits réservés.</p>
-                      </td>
-                    </tr>
-                  </table>
+                <td align="center" style="padding-top: 40px;">
+                  <!-- Liens Sociaux -->
+                  <div style="margin-bottom: 20px;">
+                    <a href="#" style="display: inline-block; margin: 0 10px; color: #808080; text-decoration: none; font-size: 14px;">LinkedIn</a>
+                    <a href="#" style="display: inline-block; margin: 0 10px; color: #808080; text-decoration: none; font-size: 14px;">Twitter</a>
+                    <a href="#" style="display: inline-block; margin: 0 10px; color: #808080; text-decoration: none; font-size: 14px;">Website</a>
+                  </div>
+                  <!-- Copyright -->
+                  <p style="margin: 0; color: #666; font-size: clamp(12px, 2vw, 13px);">
+                    © ${currentYear} NoRize. Tous droits réservés.
+                  </p>
                 </td>
               </tr>
             </table>
@@ -87,8 +98,30 @@ app.post('/send', async (req, res) => {
     </body>
     </html>
   `;
+};
 
-  const text = `
+app.post('/send', async (req, res) => {
+  const { to, subject, message } = req.body;
+
+  if (!to || !subject || !message) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Champs "to", "subject" et "message" requis.' 
+    });
+  }
+
+  const emailData = {
+    subject,
+    message
+  };
+
+  try {
+    const { error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'NoRize <contact@norize.com>',
+      to,
+      subject: `NoRize - ${subject}`,
+      html: generateEmailTemplate(emailData),
+      text: `
 NoRize
 -------
 ${subject}
@@ -100,15 +133,7 @@ Cordialement,
 L'équipe NoRize
 
 © ${new Date().getFullYear()} NoRize. Tous droits réservés.
-  `;
-
-  try {
-    const { error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'NoRize <contact@norize.com>',
-      to,
-      subject: `NoRize - ${subject}`,
-      html,
-      text,
+      `
     });
 
     if (error) {
@@ -137,4 +162,4 @@ L'équipe NoRize
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Serveur lancé sur le port ${PORT}`);
-});
+}); 
