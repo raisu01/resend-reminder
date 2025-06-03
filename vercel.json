@@ -9,14 +9,14 @@
       "src": "client/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "client/dist",
-        "buildCommand": "cd client && npm run build"
+        "distDir": "dist",
+        "buildCommand": "npm run build"
       }
     }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1.js" },
     { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/client/dist/index.html" }
+    { "src": "/(.*)", "dest": "/dist/index.html" }
   ]
 }
