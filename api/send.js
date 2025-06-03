@@ -1,32 +1,35 @@
-import express from 'express';
-import dotenv from 'dotenv';
 import { Resend } from 'resend';
-import cors from 'cors';
-import { logRequest } from './dashboard.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const app = express();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Middleware pour servir les fichiers statiques React build
-app.use(express.static(path.resolve(__dirname, '../client/dist')));
-app.use(express.json());
+export default async function handler(req, res) {
+  // Activer CORS
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
 
-// CORS configuration
-app.use(cors());
+  // Gérer les requêtes OPTIONS pour CORS
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
 
-// Middleware de log global
-app.use(logRequest);
+  // Vérifier la méthode HTTP
+  if (req.method !== 'POST') {
+    return res.status(405).json({
+      success: false,
+      message: 'Méthode non autorisée'
+    });
+  }
 
-// Route d'envoi d'email
-app.post('/api/send', async (req, res) => {
+  // Extraire les données
   const { to, subject, message } = req.body;
+
+  // Valider les champs requis
   if (!to || !subject || !message) {
     return res.status(400).json({
       success: false,
@@ -64,19 +67,19 @@ L'équipe NoRize
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Email envoyé avec succès'
     });
   } catch (err) {
     console.error('Erreur d\'envoi:', err);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Erreur lors de l\'envoi de l\'email',
       error: err.message
     });
   }
-});
+}
 
 const generateEmailTemplate = (data) => {
   const { subject, message } = data;
@@ -226,15 +229,4 @@ const generateEmailTemplate = (data) => {
     </body>
     </html>
   `;
-};
-
-// Catch-all route pour servir l'application React
-app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, '../client/dist/index.html'));
-});
-
-// Démarrer le serveur
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Serveur lancé sur le port ${PORT}`);
-});
+}; 
