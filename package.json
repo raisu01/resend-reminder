@@ -8,8 +8,8 @@
     "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
     "dev:client": "cd client && npm run dev",
     "dev:server": "nodemon api/send.js",
-    "build": "cd client && npm run build && cp -r client/dist ./",
-    "deploy": "npm run build && npm start"
+    "build": "cd client && npm run build && cp -r dist ../",
+        "deploy": "npm run build && npm start"
   },
   "keywords": [],
   "author": "",
