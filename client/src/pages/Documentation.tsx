@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { FiBook, FiCode, FiCopy, FiCheck } from 'react-icons/fi';
+import { FiBook, FiCopy, FiCheck } from 'react-icons/fi';
 
 interface CodeExample {
   language: string;
