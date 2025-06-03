@@ -1,4 +1,4 @@
-import { FiMail, FiCheckCircle, FiBarChart2, FiArrowRight, FiZap, FiRefreshCw } from 'react-icons/fi'
+import { FiMail, FiCheckCircle, FiBarChart2, FiArrowRight, FiZap, FiRefreshCw, FiBook } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 
 const features = [
@@ -40,13 +40,22 @@ const Home = () => {
           <p className="text-gray-400 text-lg md:text-xl max-w-2xl">
             Une solution élégante pour l'envoi automatisé d'emails avec un suivi en temps réel et une interface moderne.
           </p>
-          <Link
-            to="/dashboard"
-            className="group inline-flex items-center bg-gradient-to-br from-emerald-400 to-cyan-400 text-black px-6 py-3 rounded-lg font-medium hover:-translate-y-1 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/20"
-          >
-            Accéder au Dashboard 
-            <FiArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-          </Link>
+          <div className="flex items-center space-x-4">
+            <Link
+              to="/dashboard"
+              className="group inline-flex items-center bg-gradient-to-br from-emerald-400 to-cyan-400 text-black px-6 py-3 rounded-lg font-medium hover:-translate-y-1 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/20"
+            >
+              Accéder au Dashboard 
+              <FiArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
+            <Link
+              to="/docs"
+              className="group inline-flex items-center border border-emerald-400/20 text-emerald-400 px-6 py-3 rounded-lg font-medium hover:-translate-y-1 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/20 hover:bg-emerald-400/10"
+            >
+              Documentation
+              <FiBook className="ml-2 group-hover:rotate-12 transition-transform duration-300" />
+            </Link>
+          </div>
         </div>
 
         {/* Features Section */}
@@ -61,17 +70,23 @@ const Home = () => {
             {features.map((feature, idx) => (
               <div
                 key={idx}
-                className="group flex flex-col bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:-translate-y-2 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-500/50"
+                className="group flex flex-col bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:-translate-y-2 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-500/50 relative overflow-hidden"
               >
-                <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 mb-4 group-hover:shadow-lg group-hover:shadow-emerald-500/20 transition-all duration-300">
-                  {feature.icon}
+                {/* Effet de reflet */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-45deg] translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2 bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
-                  {feature.description}
-                </p>
+                <div className="relative z-10">
+                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 mb-4 group-hover:shadow-lg group-hover:shadow-emerald-500/20 transition-all duration-300">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2 bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+                    {feature.description}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -85,26 +100,36 @@ const Home = () => {
               Comment ça marche ?
             </h2>
           </div>
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 w-full max-w-3xl hover:border-cyan-500/50 transition-colors duration-300">
-            <ul className="space-y-6">
-              {[1, 2, 3].map((step) => (
-                <li key={step} className="group flex items-start">
-                  <div className="flex-shrink-0">
-                    <FiCheckCircle className="w-6 h-6 mt-1 text-emerald-400 group-hover:scale-110 transition-transform duration-300" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors duration-300">
-                      {step === 1 ? '1. Configuration Simple' : step === 2 ? '2. Envoi et Suivi' : '3. Analyse des Résultats'}
-                    </p>
-                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
-                      {step === 1 && "Intégrez l'API avec vos identifiants et commencez à envoyer des emails."}
-                      {step === 2 && "Envoyez vos emails et suivez leur statut en temps réel dans le dashboard."}
-                      {step === 3 && "Consultez les statistiques détaillées et optimisez vos campagnes."}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 w-full max-w-3xl hover:border-cyan-500/50 transition-colors duration-300 relative overflow-hidden group">
+            {/* Effet de reflet */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-45deg] translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+            </div>
+            <div className="relative z-10">
+              <ul className="space-y-6">
+                {[1, 2, 3].map((step) => (
+                  <li key={step} className="group/step flex items-start relative overflow-hidden">
+                    {/* Effet de reflet pour chaque étape */}
+                    <div className="absolute inset-0 opacity-0 group-hover/step:opacity-100 transition-opacity duration-500">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-[-45deg] translate-x-[-100%] group-hover/step:translate-x-[200%] transition-transform duration-1000"></div>
+                    </div>
+                    <div className="flex-shrink-0 relative z-10">
+                      <FiCheckCircle className="w-6 h-6 mt-1 text-emerald-400 group-hover/step:scale-110 transition-transform duration-300" />
+                    </div>
+                    <div className="ml-4 relative z-10">
+                      <p className="font-bold text-emerald-400 group-hover/step:text-emerald-300 transition-colors duration-300">
+                        {step === 1 ? '1. Configuration Simple' : step === 2 ? '2. Envoi et Suivi' : '3. Analyse des Résultats'}
+                      </p>
+                      <p className="text-gray-400 group-hover/step:text-gray-300 transition-colors duration-300">
+                        {step === 1 && "Intégrez l'API avec vos identifiants et commencez à envoyer des emails."}
+                        {step === 2 && "Envoyez vos emails et suivez leur statut en temps réel dans le dashboard."}
+                        {step === 3 && "Consultez les statistiques détaillées et optimisez vos campagnes."}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
