@@ -294,10 +294,6 @@ const Dashboard: FC = () => {
                         key={email.id}
                         className="group/row hover:bg-white/5 transition-all duration-300 relative overflow-hidden"
                       >
-                        {/* Effet de reflet pour chaque ligne */}
-                        <div className="absolute inset-0 opacity-0 group-hover/row:opacity-100 transition-opacity duration-500">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-[-45deg] translate-x-[-100%] group-hover/row:translate-x-[200%] transition-transform duration-1000"></div>
-                        </div>
                         <td className="py-4 px-4 relative">
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400/20 to-cyan-400/20 flex items-center justify-center group-hover/row:scale-110 transition-transform duration-300">
