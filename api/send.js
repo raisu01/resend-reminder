@@ -4,7 +4,7 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 const allowedOrigins = [
   'https://resend-reminder.vercel.app',
-  'https://noriseapp.com'
+  'https://noriseapp.com',
 ];
 
 const origin = req.headers.origin;
