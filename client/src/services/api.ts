@@ -66,7 +66,7 @@ export const checkEmailStatus = async (emailId: string | number): Promise<EmailR
       success: true,
       message: 'Statut récupéré avec succès',
       id: response.data.id,
-      status: response.data.status || 'pending'
+      status: response.data.status || 'sent'
     };
   } catch (error) {
     console.error('Erreur lors de la vérification du statut:', error);
