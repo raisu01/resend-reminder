@@ -25,13 +25,11 @@ const API_URL = 'https://resend-reminder.vercel.app/api';
 export const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST',
-    'Access-Control-Allow-Headers': 'Content-Type'
+    'Content-Type': 'application/json'
   },
-  withCredentials: false
+  withCredentials: false // ou supprime-le si pas nécessaire
 });
+
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

@@ -249,9 +249,9 @@ const Dashboard: FC = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-45deg] translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
           </div>
           <div className="relative z-10">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-              <div className="flex items-center space-x-3">
-                <FiInbox className="w-6 h-6 text-emerald-400 animate-bounce" />
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 overflow-x-hidden">
+              <div className="flex items-center space-x-3 overflow-x-hidden">
+                <FiInbox className="w-6 h-6 text-emerald-400 animate-bounce " />
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                   Emails envoyés
                 </h1>
@@ -288,7 +288,7 @@ const Dashboard: FC = () => {
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Date d'envoi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-white/5 overflow-x-hidden">
                     {filteredEmails.map(email => (
                       <tr 
                         key={email.id}
