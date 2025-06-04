@@ -2,11 +2,20 @@ import { Resend } from 'resend';
 
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const allowedOrigins = [
+  'https://resend-reminder.vercel.app',
+  'https://noriseapp.com'
+];
+
+const origin = req.headers.origin;
+
 
 export default async function handler(req, res) {
   // Activer CORS
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', 'https://resend-reminder.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
