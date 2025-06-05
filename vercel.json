@@ -21,14 +21,14 @@
     },
     {
       "src": "/assets/(.*)",
-      "dest": "client/assets/$1",
+      "dest": "/client/assets/$1",
       "headers": {
         "Cache-Control": "public, max-age=31536000, immutable"
       }
     },
     {
       "src": "/(fulllogo\\.png|logo\\.png|white_logo\\.png|vite\\.svg)",
-      "dest": "/dist/$1",
+      "dest": "/client/$1",
       "headers": {
         "Cache-Control": "public, max-age=86400"
       }
