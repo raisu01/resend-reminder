@@ -1,38 +1,23 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist",
-        "buildCommand": "npm run build"
-      }
+ "builds": [
+  {
+    "src": "api/*.js",
+    "use": "@vercel/node"
+  },
+  {
+    "src": "package.json",
+    "use": "@vercel/static-build",
+    "config": {
+      "distDir": "dist",
+      "buildCommand": "npm run build"
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/dist/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "s-maxage=1, stale-while-revalidate"
-        }
-      ]
-    }
+  }
+],
+
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1.js" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/dist/index.html" }
   ]
 }
