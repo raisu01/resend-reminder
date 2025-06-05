@@ -1,53 +1,88 @@
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
 import { Resend } from 'resend';
 
+// Configuration ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+// Charger les variables d'environnement
+dotenv.config();
+
+// Initialiser Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
-const allowedOrigins = [
-  'https://resend-reminder.vercel.app',
-  'https://noriseapp.com',
-];
 
-const origin = req.headers.origin;
+const app = express();
+const PORT = process.env.PORT || 3000;
 
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-export default async function handler(req, res) {
-  // Activer CORS
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+// Configuration CORS
+app.use(cors({
+  origin: [
+    `http://localhost:${PORT}`, 
+    'http://127.0.0.1:3000',
+    'https://resend-reminder.vercel.app',
+    'https://noriseapp.com'
+  ],
+  credentials: true
+}));
+
+// Configuration des types MIME pour les modules ES6
+express.static.mime.define({
+  'application/javascript': ['js', 'mjs'],
+  'text/javascript': ['js'],
+  'application/json': ['json']
+});
+
+// Servir les fichiers statiques depuis le dossier dist
+app.use(express.static(path.join(__dirname, '../client/dist'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js') || path.endsWith('.mjs')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
   }
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+}));
 
-  // Gérer les requêtes OPTIONS pour CORS
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  // Vérifier la méthode HTTP
-  if (req.method !== 'POST') {
-    return res.status(405).json({
-      success: false,
-      message: 'Méthode non autorisée'
-    });
-  }
-
-  // Extraire les données
-  const { to, subject, message } = req.body;
-
-  // Valider les champs requis
-  if (!to || !subject || !message) {
-    return res.status(400).json({
-      success: false,
-      message: 'Champs "to", "subject" et "message" requis.'
-    });
-  }
-
+// Route API pour l'envoi d'emails
+app.post('/api/send', async (req, res) => {
   try {
+    // Gérer CORS manuellement comme dans votre code original
+    const allowedOrigins = [
+      'https://resend-reminder.vercel.app',
+      'https://noriseapp.com',
+      `http://localhost:${PORT}`,
+      'http://127.0.0.1:3000'
+    ];
+    
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+
+    // Extraire les données
+    const { to, subject, message } = req.body;
+
+    // Valider les champs requis
+    if (!to || !subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Champs "to", "subject" et "message" requis.'
+      });
+    }
+
+    // Envoyer l'email
     const { error } = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'NoRize <contact@norize.com>',
       to,
@@ -81,6 +116,7 @@ L'équipe NoRize
       success: true,
       message: 'Email envoyé avec succès'
     });
+
   } catch (err) {
     console.error('Erreur d\'envoi:', err);
     return res.status(500).json({
@@ -89,8 +125,37 @@ L'équipe NoRize
       error: err.message
     });
   }
-}
+});
 
+// Gérer les requêtes OPTIONS pour CORS
+app.options('/api/send', (req, res) => {
+  const allowedOrigins = [
+    'https://resend-reminder.vercel.app',
+    'https://noriseapp.com',
+    `http://localhost:${PORT}`,
+    'http://127.0.0.1:3000'
+  ];
+  
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+  
+  res.status(200).end();
+});
+
+// Route catch-all pour servir index.html (pour les SPAs)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+// Fonction pour générer le template d'email
 const generateEmailTemplate = (data) => {
   const { subject, message } = data;
   const currentYear = new Date().getFullYear();
@@ -231,3 +296,17 @@ const generateEmailTemplate = (data) => {
     </html>
   `;
 };
+
+// Démarrer le serveur
+app.listen(PORT, () => {
+  console.log(`🚀 Serveur NoRize démarré sur http://localhost:${PORT}`);
+  console.log(`📁 Fichiers statiques servis depuis: ${path.join(__dirname, '../client/dist')}`);
+  console.log(`📧 API disponible sur: http://localhost:${PORT}/api/send`);
+  console.log('\n--- Configuration ---');
+  console.log(`RESEND_API_KEY: ${process.env.RESEND_API_KEY ? '✅ Configuré' : '❌ Manquant'}`);
+  console.log(`EMAIL_FROM: ${process.env.EMAIL_FROM || 'NoRize <contact@norize.com> (défaut)'}`);
+  console.log('\n--- Origines autorisées ---');
+  console.log(`• http://localhost:${PORT}`);
+  console.log(`• https://resend-reminder.vercel.app`);
+  console.log(`• https://noriseapp.com`);
+});
